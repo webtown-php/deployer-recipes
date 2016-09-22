@@ -1,0 +1,25 @@
+{
+    "name": "webtown/deployer-recipes",
+    "description": "Some Deployer recipes.",
+    "type": "library",
+    "require": {
+        "deployer/deployer": "4.x-dev"
+    },
+    "keywords": [
+        "deployer",
+        "recipes",
+        "deploy",
+        "deployment",
+        "symfony",
+        "symfony2",
+        "symfony3",
+        "kunstmaan"
+    ],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Krisztián Ferenczi",
+            "email": "ferenczi.krisztian@gmail.com"
+        }
+    ]
+}
