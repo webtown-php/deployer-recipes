@@ -5,11 +5,6 @@ set('shared_dirs', ['app/logs', 'web/uploads']);
 set('writable_dirs', ['app/cache', 'app/logs', 'web/uploads']);
 set('writable_use_sudo', false);
 
-task('deploy:avanzu-install', function () {
-    run('{{env_vars}} {{bin/php}} {{bin/console}} avanzu:admin:fetch-vendor {{console_options}}');
-})->desc('Avanzu install');
-after('deploy:vendors', 'deploy:avanzu-install');
-
 /**
  * Erőszakosan töröljük a cache-t. Vmiért erre szükség van. Ha nem volt használva, akkor néha az assetic:dump elhasalt
  * hibaüzenettel.
