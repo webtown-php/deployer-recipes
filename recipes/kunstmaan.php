@@ -1,4 +1,5 @@
 <?php
+namespace Deployer;
 
 set('shared_files', ['app/config/parameters.yml', 'app/config/nodejs_parameters.yml']);
 set('shared_dirs', ['app/logs', 'web/uploads']);
