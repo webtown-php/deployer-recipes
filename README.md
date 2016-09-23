@@ -13,6 +13,8 @@ Include the `vendor/webtown/deployer-recipes/recipes/kunstmaan.php` file after `
 ```php
 <?php
 
+namespace Deployer;
+
 require 'vendor/deployer/deployer/recipe/symfony.php';
 require 'vendor/webtown/deployer-recipes/recipes/kunstmaan.php';
 
