@@ -1,17 +1,13 @@
 <?php
 namespace Deployer;
 
+require_once 'symfony.php';
+
 set('shared_files', ['app/config/parameters.yml', 'app/config/nodejs_parameters.yml']);
-set('shared_dirs', ['app/logs', 'web/uploads']);
-set('writable_dirs', ['app/cache', 'app/logs', 'web/uploads']);
+extendArrayConfig('shared_dirs', ['web/uploads']);
+extendArrayConfig('writable_dirs', ['web/uploads']);
 set('writable_use_sudo', false);
 
-/**
- * Sometimes we need a force cache cleaner
- */
-task('deploy:force-cache-clean', function() {
-    run ('rm -rf {{release_path}}/app/cache/{{env}}');
-})->setPrivate();
 // Commented example
 //before('deploy:assetic:dump', 'deploy:force-cache-clean');
 

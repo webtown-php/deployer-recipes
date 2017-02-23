@@ -1,0 +1,3 @@
+<?php
+
+set('name', '{{ name }}');

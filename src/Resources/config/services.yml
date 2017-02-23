@@ -1,0 +1,3 @@
+services:
+    webtown_deployer.template_manager:
+        class: Webtown\DeployerRecipesBundle\Template\TemplateManager
