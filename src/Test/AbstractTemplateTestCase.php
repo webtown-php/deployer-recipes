@@ -39,19 +39,12 @@ class AbstractTemplateTestCase extends \PHPUnit_Framework_TestCase
         m::close();
     }
 
-    protected function buildTemplateObject($class, $resultDirectory)
+    protected function buildTemplateObject($class, $testDirectory)
     {
-        $testDirectory = implode(DIRECTORY_SEPARATOR, [
-            __DIR__,
-            '..',
-            'Resources',
-            'Template',
-            (new \ReflectionClass($class))->getShortName(),
-            $resultDirectory
-        ]);
         $twig = new \Twig_Environment(new \Twig_Loader_Array());
         // Nem nézzük meg, hogy valójában léteznek-e a fájlok, mivel léteznek.
         $this->filesystem = new DummyFilesystem();
+
         return new $class($testDirectory, $twig, $this->filesystem);
     }
 
@@ -99,10 +92,10 @@ class AbstractTemplateTestCase extends \PHPUnit_Framework_TestCase
         return $command;
     }
 
-    protected function runTestBuild($class, $parameters, $resultDirectory)
+    protected function runTestBuild($class, $parameters, $testDirectory)
     {
         /** @var AbstractDirectoryTwigTemplate $template */
-        $template = $this->buildTemplateObject($class, $resultDirectory);
+        $template = $this->buildTemplateObject($class, $testDirectory);
 
         $input = new ArrayInput([]);
         $output = new BufferedOutput();
@@ -110,7 +103,7 @@ class AbstractTemplateTestCase extends \PHPUnit_Framework_TestCase
         $template->build($input, $output, $command);
 
         /** @var SplFileInfo[] $resultFiles */
-        $resultFiles = Finder::create()->files()->in($template->getDirectory());
+        $resultFiles = Finder::create()->files()->in($testDirectory);
         $responseFiles = $this->filesystem->getDumpedFiles();
         $this->assertEquals(count($responseFiles), count($resultFiles));
         foreach ($resultFiles as $resultFile) {
