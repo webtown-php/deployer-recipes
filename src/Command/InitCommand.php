@@ -30,11 +30,8 @@ class InitCommand extends ContainerAwareCommand
 The <info>%command.name%</info> initialize the deployment:
 
 <info>php app/console %command.name% --branch=master --last=a978ec5fa342d88fa71e67f0482c2b33037a4271</info>
-
-
 EOT
             )
-//            ->addOption('branch', null, InputOption::VALUE_OPTIONAL, 'Active branch', 'HEAD')
         ;
     }
 

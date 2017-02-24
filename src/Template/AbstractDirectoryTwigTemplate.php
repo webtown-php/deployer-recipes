@@ -28,9 +28,9 @@ abstract class AbstractDirectoryTwigTemplate implements TemplateInterface
     protected $rootDir;
 
     /**
-     * @var EngineInterface
+     * @var \Twig_Environment
      */
-    protected $templating;
+    protected $twig;
 
     /**
      * @var Filesystem
@@ -42,10 +42,10 @@ abstract class AbstractDirectoryTwigTemplate implements TemplateInterface
      */
     protected $parameters = [];
 
-    public function __construct($rootDir, EngineInterface $templating, Filesystem $filesystem)
+    public function __construct($rootDir, \Twig_Environment $twig, Filesystem $filesystem)
     {
         $this->rootDir = rtrim($rootDir, DIRECTORY_SEPARATOR);
-        $this->templating = $templating;
+        $this->twig = $twig;
         $this->filesystem = $filesystem;
     }
 
@@ -92,7 +92,8 @@ abstract class AbstractDirectoryTwigTemplate implements TemplateInterface
             }
         }
 
-        $newContent = $this->templating->render($file->getPathname(), array_merge($this->parameters, $this->getTemplateParameters()));
+        $template = $this->twig->createTemplate($file->getContents());
+        $newContent = $template->render(array_merge($this->parameters, $this->getTemplateParameters()));
         $this->filesystem->dumpFile($targetPath, $newContent);
         $output->writeln(sprintf('Create the <info>%s</info> file.', $targetPath));
     }

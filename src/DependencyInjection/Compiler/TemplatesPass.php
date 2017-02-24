@@ -29,10 +29,10 @@ class TemplatesPass implements CompilerPassInterface
 
         $templates = $this->findAndSortTaggedServices('webtown_deployer.template', $container);
 
-        if (empty($warmers)) {
+        if (empty($templates)) {
             return;
         }
 
-        $container->getDefinition('webtown_deployer.template_manager')->addMethodCall('setTemplates', $templates);
+        $container->getDefinition('webtown_deployer.template_manager')->addMethodCall('setTemplates', [$templates]);
     }
 }
