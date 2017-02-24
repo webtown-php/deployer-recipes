@@ -83,6 +83,7 @@ abstract class AbstractDirectoryTwigTemplate implements TemplateInterface
         $helper = $command->getHelper('question');
         $targetPath = implode(DIRECTORY_SEPARATOR, [
             $this->rootDir,
+            '..',
             $file->getRelativePathname()
         ]);
         if ($this->filesystem->exists($targetPath)) {

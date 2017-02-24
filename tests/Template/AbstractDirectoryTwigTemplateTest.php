@@ -15,10 +15,6 @@ use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
-use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Templating\EngineInterface;
-use Symfony\Component\Templating\TemplateReferenceInterface;
-use Webtown\DeployerRecipesBundle\Template\AbstractDirectoryTwigTemplate;
 
 class AbstractDirectoryTwigTemplateTest extends \PHPUnit_Framework_TestCase
 {
@@ -39,9 +35,9 @@ class AbstractDirectoryTwigTemplateTest extends \PHPUnit_Framework_TestCase
      */
     public function testBuild($type, $rootDir, $existingFiles, $questionResponses, $outputs, $files)
     {
-        $templating = new TestTemplating();
+        $twig = new \Twig_Environment(new \Twig_Loader_Array());
         $filesystem = new DummyFilesystem($existingFiles);
-        $template = new TestDirectoryTwigTemplate($type, $rootDir, $templating, $filesystem);
+        $template = new TestDirectoryTwigTemplate($type, $rootDir, $twig, $filesystem);
         $input = new ArrayInput([]);
         $output = new BufferedOutput();
         $command = new Command('test:command');
@@ -123,32 +119,32 @@ EOS;
                 '',                                  // $rootDir
                 [],                                  // $existingFiles
                 [],                                  // $questionResponses
-                ['Create the /deploy.php file.'],    // $outputs
-                ['/deploy.php' => $deployPhpContent] // $files
+                ['Create the /../deploy.php file.'],    // $outputs
+                ['/../deploy.php' => $deployPhpContent] // $files
             ],
             [
                 'test1',
                 '/test/root/dir/',
                 [],
                 [],
-                ['Create the /test/root/dir/deploy.php file.'],
-                ['/test/root/dir/deploy.php' => $deployPhpContent]
+                ['Create the /test/root/dir/../deploy.php file.'],
+                ['/test/root/dir/../deploy.php' => $deployPhpContent]
             ],
             [
                 'test1',                              // $type
                 '',                                   // $rootDir
-                ['/deploy.php'],                      // $existingFiles
-                ['The `/deploy.php` file exists! Do you want override it? (y/N)' => true], // $questionResponses
-                ['Create the /deploy.php file.'],     // $outputs
-                ['/deploy.php' => $deployPhpContent]  // $files
+                ['/../deploy.php'],                      // $existingFiles
+                ['The `/../deploy.php` file exists! Do you want override it? (y/N)' => true], // $questionResponses
+                ['Create the /../deploy.php file.'],     // $outputs
+                ['/../deploy.php' => $deployPhpContent]  // $files
             ],
             [
                 'test1',                                 // $type
                 '',                                      // $rootDir
-                ['/deploy.php'],                         // $existingFiles
-                ['The `/deploy.php` file exists! Do you want override it? (y/N)' => false], // $questionResponses
-                ['Create the /deploy.php.tmp file.'],    // $outputs
-                ['/deploy.php.tmp' => $deployPhpContent] // $files
+                ['/../deploy.php'],                         // $existingFiles
+                ['The `/../deploy.php` file exists! Do you want override it? (y/N)' => false], // $questionResponses
+                ['Create the /../deploy.php.tmp file.'],    // $outputs
+                ['/../deploy.php.tmp' => $deployPhpContent] // $files
             ],
             // TEST2
             [
@@ -157,12 +153,12 @@ EOS;
                 [],
                 [],
                 [
-                    'Create the /deploy.php file.',
-                    'Create the /app/config/Deployer/servers.yml file.',
+                    'Create the /../deploy.php file.',
+                    'Create the /../app/config/Deployer/servers.yml file.',
                 ],
                 [
-                    '/deploy.php' => $deployPhpContent,
-                    '/app/config/Deployer/servers.yml' => $serversYmlContent,
+                    '/../deploy.php' => $deployPhpContent,
+                    '/../app/config/Deployer/servers.yml' => $serversYmlContent,
                 ]
             ],
             [
@@ -171,40 +167,40 @@ EOS;
                 [],
                 [],
                 [
-                    'Create the /test/root/dir/deploy.php file.',
-                    'Create the /test/root/dir/app/config/Deployer/servers.yml file.',
+                    'Create the /test/root/dir/../deploy.php file.',
+                    'Create the /test/root/dir/../app/config/Deployer/servers.yml file.',
                 ],
                 [
-                    '/test/root/dir/deploy.php' => $deployPhpContent,
-                    '/test/root/dir/app/config/Deployer/servers.yml' => $serversYmlContent,
+                    '/test/root/dir/../deploy.php' => $deployPhpContent,
+                    '/test/root/dir/../app/config/Deployer/servers.yml' => $serversYmlContent,
                 ]
             ],
             [
                 'test2',
                 '',
-                ['/deploy.php'],
-                ['The `/deploy.php` file exists! Do you want override it? (y/N)' => true], // $questionResponses
+                ['/../deploy.php'],
+                ['The `/../deploy.php` file exists! Do you want override it? (y/N)' => true], // $questionResponses
                 [
-                    'Create the /deploy.php file.',
-                    'Create the /app/config/Deployer/servers.yml file.',
+                    'Create the /../deploy.php file.',
+                    'Create the /../app/config/Deployer/servers.yml file.',
                 ],
                 [
-                    '/deploy.php' => $deployPhpContent,
-                    '/app/config/Deployer/servers.yml' => $serversYmlContent,
+                    '/../deploy.php' => $deployPhpContent,
+                    '/../app/config/Deployer/servers.yml' => $serversYmlContent,
                 ]
             ],
             [
                 'test2',
                 '',
-                ['/deploy.php'],
-                ['The `/deploy.php` file exists! Do you want override it? (y/N)' => false], // $questionResponses
+                ['/../deploy.php'],
+                ['The `/../deploy.php` file exists! Do you want override it? (y/N)' => false], // $questionResponses
                 [
-                    'Create the /deploy.php.tmp file.',
-                    'Create the /app/config/Deployer/servers.yml file.',
+                    'Create the /../deploy.php.tmp file.',
+                    'Create the /../app/config/Deployer/servers.yml file.',
                 ],
                 [
-                    '/deploy.php.tmp' => $deployPhpContent,
-                    '/app/config/Deployer/servers.yml' => $serversYmlContent,
+                    '/../deploy.php.tmp' => $deployPhpContent,
+                    '/../app/config/Deployer/servers.yml' => $serversYmlContent,
                 ]
             ],
         ];

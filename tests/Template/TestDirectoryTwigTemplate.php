@@ -24,14 +24,14 @@ class TestDirectoryTwigTemplate extends AbstractDirectoryTwigTemplate
      * TestDirectoryTwigTemplate constructor.
      * @param string $type
      * @param string $rootDir
-     * @param EngineInterface $templating
+     * @param \Twig_Environment $twig
      * @param Filesystem $filesystem
      */
-    public function __construct($type, $rootDir, EngineInterface $templating, Filesystem $filesystem)
+    public function __construct($type, $rootDir, $twig, Filesystem $filesystem)
     {
         $this->type = $type;
 
-        parent::__construct($rootDir, $templating, $filesystem);
+        parent::__construct($rootDir, $twig, $filesystem);
     }
 
     public function getDirectory()
