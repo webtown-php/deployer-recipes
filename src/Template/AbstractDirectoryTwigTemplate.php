@@ -94,6 +94,9 @@ abstract class AbstractDirectoryTwigTemplate implements TemplateInterface
 
         $template = $this->twig->createTemplate($file->getContents());
         $newContent = $template->render(array_merge($this->parameters, $this->getTemplateParameters()));
+        if (in_array($file->getExtension(), ['php', 'yml', 'dist', 'twig', 'html', 'js', 'css'])) {
+            $newContent = trim($newContent) . "\n";
+        }
         $this->filesystem->dumpFile($targetPath, $newContent);
         $output->writeln(sprintf('Create the <info>%s</info> file.', $targetPath));
     }
