@@ -8,6 +8,7 @@
 
 namespace Tests\Webtown\DeployerRecipesBundle\Template;
 
+use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Templating\EngineInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Webtown\DeployerRecipesBundle\Template\AbstractDirectoryTwigTemplate;
@@ -42,6 +43,14 @@ class TestDirectoryTwigTemplate extends AbstractDirectoryTwigTemplate
             'Template',
             $this->type,
         ]);
+    }
+
+    /**
+     * @return array|Question[]
+     */
+    protected function getParameterQuestions()
+    {
+        return [];
     }
 
     public function getTemplateParameters()

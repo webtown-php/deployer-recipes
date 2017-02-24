@@ -7,8 +7,36 @@ use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Parser;
 
 /*
- * Register new tasks:
- *  - deploy:init-parameters-yml
+ * The inserted new tasks:
+ * 
+ * task('deploy', [
+ *     'deploy:prepare',                   'deploy:prepare',
+ *     'deploy:lock',                      'deploy:lock',
+ *     'deploy:release',                   'deploy:release',
+ *     'deploy:update_code',               'deploy:update_code',
+ *     'deploy:clear_paths',               'deploy:clear_paths',
+ *     'deploy:create_cache_dir',          'deploy:create_cache_dir',
+ *     'deploy:shared',                    'deploy:shared',
+ *     'deploy:assets',                    'deploy:assets',
+ * 
+ *         'deploy:init-parameters-yml',
+ *             'database:mysql:backup',    // Only enable load fixture
+ *             'database:mysql:raw-drop',  // Only enable load fixture
+ *         'database:mysql:raw-create',
+ * 
+ *     'deploy:vendors',                   'deploy:vendors',
+ *     'deploy:assets:install',            'deploy:assets:install',
+ *     'deploy:assetic:dump',              'deploy:assetic:dump',
+ *     'deploy:cache:warmup',              'deploy:cache:warmup',
+ * 
+ *         'database:migrate',
+ *             'database:load-fixtures',   // Only enable load fixture
+ * 
+ *     'deploy:writable',                  'deploy:writable',
+ *     'deploy:symlink',                   'deploy:symlink',
+ *     'deploy:unlock',                    'deploy:unlock',
+ *     'cleanup',                          'cleanup',
+ * ]);
  */
 
 // Ask questions?
@@ -16,9 +44,15 @@ set('interaction', true);
 set('doctrine_migration_path', 'app/DoctrineMigrations');
 set('use_database_migration_strategy', false);
 set('enable_mysql_database_create', false);
+set('enable_mysql_database_drop', false);
 set('parameters_file', 'app/config/parameters.yml');
 
-// Only use in maintenance.php recipe!
+// Database
+set('sql_backup_file', function() {
+    return sprintf('{{deploy_path}}/current/backup_%s.sql', date('YdmHis'));
+});
+
+// Only use in maintenance.php recipe! Override the original
 set('maintenance_template', 'app/Resources/views/maintenance.html');
 
 /**
@@ -61,23 +95,69 @@ task('deploy:init-parameters-yml', function() {
     }
 })->desc('Initialize `parameters.yml`');
 
+task('database:mysql:backup', function(){
+    $parameters = getParameters();
+    $backupFilePath = get('sql_backup_file');
+
+    run(sprintf(
+        'mysqldump --default-character-set=utf8 --opt' .
+        ' --host=%s' .
+        ' --user=%s' .
+        ' --password="%s"' .
+        ' -B %s > %s',
+        $parameters['database_host'],
+        $parameters['database_user'],
+        $parameters['database_password'],
+        $parameters['database_name'],
+        $backupFilePath
+    ));
+    writeln(sprintf('MySQL backup file: <info>%s</info>', $backupFilePath));
+})->desc('MySQL database backup.');
+
+/**
+ * Drop database if exists
+ */
+task('database:mysql:raw-drop', function () {
+    if (get('enable_mysql_database_create') && get('enable_mysql_database_drop')) {
+        $parameters = getParameters();
+
+        run(sprintf(
+            'mysql' .
+            ' --host=%s' .
+            ' --user=%s' .
+            ' --password="%s"'.
+            ' -e "DROP DATABASE IF EXISTS `%s`"',
+            $parameters['database_host'],
+            $parameters['database_user'],
+            $parameters['database_password'],
+            $parameters['database_name']
+        ));
+    } else {
+        writeln(sprintf(
+            '<info>"Drop database in mysql"</info> is <comment>disabled</comment>. You can enable it with the <info>%s</info> parameter!',
+            'enable_mysql_database_create'
+        ));
+    }
+})->desc('Drop database in mysql');
+
 /**
  * Create database if not exists
  */
 task('database:mysql:raw-create', function () {
     if (get('enable_mysql_database_create')) {
-        try {
-            $ymlParser = new Parser();
-            $config = $ymlParser->parse(run("cat {{release_path}}/{{parameters_file}}")->toString());
-            $parameters = $config['parameters'];
+        $parameters = getParameters();
 
-            run(sprintf('mysql -u %s -p%s -e "create database if not exists %s"',
-                $parameters['database_user'],
-                $parameters['database_password'],
-                $parameters['database_name']));
-        } catch (ParseException $e) {
-            writeln(sprintf('Parse error [<info>%s</info>]: <comment>%s</comment>', get('parameters_file'), $e->getMessage()));
-        }
+        run(sprintf(
+            'mysql' .
+            ' --host=%s' .
+            ' --user=%s' .
+            ' --password="%s"'.
+            ' -e "CREATE DATABASE IF NOT EXISTS `%s`"',
+            $parameters['database_host'],
+            $parameters['database_user'],
+            $parameters['database_password'],
+            $parameters['database_name']
+        ));
     } else {
         writeln(sprintf(
             '<info>"Creating database in mysql"</info> is <comment>disabled</comment>. You can enable it with the <info>%s</info> parameter!',
@@ -86,8 +166,15 @@ task('database:mysql:raw-create', function () {
     }
 })->desc('Creating database in mysql');
 
+// If you want to use drop, register it!
+before('database:mysql:raw-drop', 'database:mysql:backup');
+
+// Build database if not exists
 before('deploy:vendors', 'database:mysql:raw-create');
 before('database:mysql:raw-create', 'deploy:init-parameters-yml');
+
+// Migration
+before('deploy:writable', 'database:migrate');
 
 /**
  * Database migration rollback
@@ -152,7 +239,6 @@ task('database:migrate:rollback', function () {
         }
     }
 })->desc('Rollback the database (only if set `use_database_migration_strategy` true)');
-
 // Run before rollback
 before('rollback', 'database:migrate:rollback');
 
@@ -167,4 +253,19 @@ function extendArrayConfig($name, $newValues)
 {
     $new = array_unique(array_merge(get($name, []), $newValues));
     set($name, $new);
+}
+
+function getParameters()
+{
+    if (!get('symfony_parameters', false)) {
+        try {
+            $ymlParser = new Parser();
+            $config = $ymlParser->parse(run("cat {{release_path}}/{{parameters_file}}")->toString());
+            set('symfony_parameters', $config['parameters']);
+        } catch (ParseException $e) {
+            writeln(sprintf('Parse error [<info>%s</info>]: <comment>%s</comment>', get('parameters_file'), $e->getMessage()));
+        }
+    }
+
+    return get('symfony_parameters');
 }

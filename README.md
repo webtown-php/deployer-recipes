@@ -249,6 +249,33 @@ Rollback:
 $ bin/dep rollback prod [-vvv]
 ```
 
+## Load fixtures
+
+> This will delete the whole database and rebuild it!
+
+You can enable on each server with the `load_fixtures` parameter! Default value is `false`.
+
+```php
+<?php
+
+namespace Deployer;
+
+// include base
+require 'vendor/deployer/deployer/recipe/symfony3.php';
+// include extension
+require 'vendor/webtown/deployer-recipes/recipes/symfony.php';
+require 'vendor/webtown/deployer-recipes/recipes/load-fixtures.php';
+
+const SERVER_CONFIGURATION_FILE_PATH = 'app/config/deploy/servers.yml';
+if (!file_exists(SERVER_CONFIGURATION_FILE_PATH)) {
+    throw new \Exception(sprintf('Nem lett még létrehozva a szerver konfigurációs fájlod a `%s` helyen!', SERVER_CONFIGURATION_FILE_PATH));
+}
+serverList(SERVER_CONFIGURATION_FILE_PATH);
+
+set('repository', 'git@github.com:webtown-php/project.git');
+```
+
+
 ## Maintenance
 
 Add maintenance function, you can lock or unlock the site. You need a maintenance template html. The default path is defined in `maintenance_template` parameter. Default value is `maintenance.html.tpl` or `app/Resources/views/maintenance.html` file in Symfony projects.
@@ -287,7 +314,8 @@ namespace Deployer;
 // include base
 require 'vendor/deployer/deployer/recipe/symfony3.php';
 // include extension
-require 'vendor/webtown/deployer-recipes/recipes/maintenance.php';
+require 'vendor/webtown/deployer-recipes/recipes/maintenance.php'; // <-- first!!!!
+require 'vendor/webtown/deployer-recipes/recipes/symfony.php';     // <-- second!!!
 
 // ...
 
