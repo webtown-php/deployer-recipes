@@ -45,7 +45,7 @@ class AbstractTemplateTestCase extends \PHPUnit_Framework_TestCase
         // Nem nézzük meg, hogy valójában léteznek-e a fájlok, mivel léteznek.
         $this->filesystem = new DummyFilesystem();
 
-        return new $class($testDirectory, $twig, $this->filesystem);
+        return new $class($testDirectory . DIRECTORY_SEPARATOR . 'app', $twig, $this->filesystem);
     }
 
     protected function buildCommand($template, $parameters, $name = 'test:command')
@@ -108,13 +108,13 @@ class AbstractTemplateTestCase extends \PHPUnit_Framework_TestCase
         $this->assertEquals(count($responseFiles), count($resultFiles));
         foreach ($resultFiles as $resultFile) {
             $this->assertTrue(
-                array_key_exists($resultFile->getPathname(), $responseFiles),
-                sprintf('The `%s` file didn\'t created! Created files: `%s`', $resultFile->getPathname(), implode('`, `', array_keys($responseFiles)))
+                array_key_exists(realpath($resultFile->getPathname()), $responseFiles),
+                sprintf('The `%s` file didn\'t created! Created files: `%s`', realpath($resultFile->getPathname()), implode('`, `', array_keys($responseFiles)))
             );
             $this->assertEquals(
                 $resultFile->getContents(),
-                $responseFiles[$resultFile->getPathname()],
-                sprintf('The result of `%s` file is different.', $resultFile->getPathname())
+                $responseFiles[realpath($resultFile->getPathname())],
+                sprintf('The result of `%s` file is different.', realpath($resultFile->getPathname()))
             );
         }
     }
