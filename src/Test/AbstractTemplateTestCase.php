@@ -119,6 +119,13 @@ class AbstractTemplateTestCase extends \PHPUnit_Framework_TestCase
         }
     }
 
+    /**
+     * The `realpath()` function is not the best solution for test.
+     *
+     * @param $filePath
+     * @return string
+     * @throws \Exception
+     */
     public static function getRealPath($filePath)
     {
         $path = [];
