@@ -8,7 +8,7 @@ use Symfony\Component\Yaml\Parser;
 
 /*
  * The inserted new tasks:
- * 
+ *
  * task('deploy', [
  *     'deploy:prepare',                   'deploy:prepare',
  *     'deploy:lock',                      'deploy:lock',
@@ -18,20 +18,20 @@ use Symfony\Component\Yaml\Parser;
  *     'deploy:create_cache_dir',          'deploy:create_cache_dir',
  *     'deploy:shared',                    'deploy:shared',
  *     'deploy:assets',                    'deploy:assets',
- * 
+ *
  *         'deploy:init-parameters-yml',
  *             'database:mysql:backup',    // Only enable load fixture
  *             'database:mysql:raw-drop',  // Only enable load fixture
  *         'database:mysql:raw-create',
- * 
+ *
  *     'deploy:vendors',                   'deploy:vendors',
  *     'deploy:assets:install',            'deploy:assets:install',
  *     'deploy:assetic:dump',              'deploy:assetic:dump',
  *     'deploy:cache:warmup',              'deploy:cache:warmup',
- * 
+ *
  *         'database:migrate',
  *             'database:load-fixtures',   // Only enable load fixture
- * 
+ *
  *     'deploy:writable',                  'deploy:writable',
  *     'deploy:symlink',                   'deploy:symlink',
  *     'deploy:unlock',                    'deploy:unlock',
@@ -95,23 +95,33 @@ task('deploy:init-parameters-yml', function() {
     }
 })->desc('Initialize `parameters.yml`');
 
-task('database:mysql:backup', function(){
-    $parameters = getParameters();
-    $backupFilePath = get('sql_backup_file');
+task('database:mysql:backup', function() {
+    if (fileExists('{{release_path}}/{{parameters_file}}')
+        && fileExists('`dirname {{ sql_backup_file}}`', FILE_CHECK_IS_DIR)
+    ) {
+        $parameters = getParameters();
+        $backupFilePath = get('sql_backup_file');
 
-    run(sprintf(
-        'mysqldump --default-character-set=utf8 --opt' .
-        ' --host=%s' .
-        ' --user=%s' .
-        ' --password="%s"' .
-        ' -B %s > %s',
-        $parameters['database_host'],
-        $parameters['database_user'],
-        $parameters['database_password'],
-        $parameters['database_name'],
-        $backupFilePath
-    ));
-    writeln(sprintf('MySQL backup file: <info>%s</info>', $backupFilePath));
+        run(sprintf(
+            'mysqldump --default-character-set=utf8 --opt' .
+            ' --host=%s' .
+            ' --user=%s' .
+            ' --password="%s"' .
+            ' -B %s > %s',
+            $parameters['database_host'],
+            $parameters['database_user'],
+            $parameters['database_password'],
+            $parameters['database_name'],
+            $backupFilePath
+        ));
+        writeln(sprintf('MySQL backup file: <info>%s</info>', $backupFilePath));
+    } else {
+        if (!fileExists('{{release_path}}/{{parameters_file}}')) {
+            writeln('No database backup: The <info>parameters.yml</info> doesn\'t exist! (<info>{{release_path}}/{{parameters_file}}</info>)');
+        } else {
+            writeln('No database backup: The <info>directory of {{sql_backup_file}}</info> doesn\'t exist yet.');
+        }
+    }
 })->desc('MySQL database backup.');
 
 /**
@@ -126,7 +136,7 @@ task('database:mysql:raw-drop', function () {
             ' --host=%s' .
             ' --user=%s' .
             ' --password="%s"'.
-            ' -e "DROP DATABASE IF EXISTS `%s`"',
+            ' -e "DROP DATABASE IF EXISTS \`%s\`"',
             $parameters['database_host'],
             $parameters['database_user'],
             $parameters['database_password'],
@@ -152,7 +162,7 @@ task('database:mysql:raw-create', function () {
             ' --host=%s' .
             ' --user=%s' .
             ' --password="%s"'.
-            ' -e "CREATE DATABASE IF NOT EXISTS `%s`"',
+            ' -e "CREATE DATABASE IF NOT EXISTS \`%s\`"',
             $parameters['database_host'],
             $parameters['database_user'],
             $parameters['database_password'],
@@ -171,7 +181,7 @@ before('database:mysql:raw-drop', 'database:mysql:backup');
 
 // Build database if not exists
 before('deploy:vendors', 'database:mysql:raw-create');
-before('database:mysql:raw-create', 'deploy:init-parameters-yml');
+before('database:mysql:backup', 'deploy:init-parameters-yml');
 
 // Migration
 before('deploy:writable', 'database:migrate');
