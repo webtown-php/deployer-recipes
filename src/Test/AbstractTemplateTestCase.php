@@ -108,14 +108,38 @@ class AbstractTemplateTestCase extends \PHPUnit_Framework_TestCase
         $this->assertEquals(count($responseFiles), count($resultFiles));
         foreach ($resultFiles as $resultFile) {
             $this->assertTrue(
-                array_key_exists(realpath($resultFile->getPathname()), $responseFiles),
-                sprintf('The `%s` file didn\'t created! Created files: `%s`', realpath($resultFile->getPathname()), implode('`, `', array_keys($responseFiles)))
+                array_key_exists(static::getRealPath($resultFile->getPathname()), $responseFiles),
+                sprintf('The `%s` file didn\'t created! Created files: `%s`', static::getRealPath($resultFile->getPathname()), implode('`, `', array_keys($responseFiles)))
             );
             $this->assertEquals(
                 $resultFile->getContents(),
-                $responseFiles[realpath($resultFile->getPathname())],
-                sprintf('The result of `%s` file is different.', realpath($resultFile->getPathname()))
+                $responseFiles[static::getRealPath($resultFile->getPathname())],
+                sprintf('The result of `%s` file is different.', static::getRealPath($resultFile->getPathname()))
             );
         }
+    }
+
+    public static function getRealPath($filePath)
+    {
+        $path = [];
+        foreach(explode('/', $filePath) as $part) {
+            // ignore parts that have no value
+            if (empty($part) || $part === '.') continue;
+
+            if ($part !== '..') {
+                // cool, we found a new part
+                array_push($path, $part);
+            }
+            else if (count($path) > 0) {
+                // going back up? sure
+                array_pop($path);
+            } else {
+                // now, here we don't like
+                throw new \Exception('Climbing above the root is not permitted.');
+            }
+        }
+        $fullPath = implode('/', $path);
+
+        return ($filePath[0] == '/') ? '/' . $fullPath : $fullPath;
     }
 }

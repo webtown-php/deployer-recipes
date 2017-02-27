@@ -44,7 +44,7 @@ class DummyFilesystem extends Filesystem
 
     public function dumpFile($filename, $content)
     {
-        $this->dumpedFiles[realpath($filename)] = $content;
+        $this->dumpedFiles[AbstractTemplateTestCase::getRealPath($filename)] = $content;
     }
 
     public function getDumpedFiles()

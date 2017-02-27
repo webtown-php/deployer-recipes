@@ -154,11 +154,11 @@ EOS;
                 [],
                 [
                     'Create the /../deploy.php file.',
-                    'Create the /../app/config/Deployer/servers.yml file.',
+                    'Create the /../app/config/deployment/servers.yml file.',
                 ],
                 [
                     '/../deploy.php' => $deployPhpContent,
-                    '/../app/config/Deployer/servers.yml' => $serversYmlContent,
+                    '/../app/config/deployment/servers.yml' => $serversYmlContent,
                 ]
             ],
             [
@@ -168,11 +168,11 @@ EOS;
                 [],
                 [
                     'Create the /test/root/dir/../deploy.php file.',
-                    'Create the /test/root/dir/../app/config/Deployer/servers.yml file.',
+                    'Create the /test/root/dir/../app/config/deployment/servers.yml file.',
                 ],
                 [
                     '/test/root/dir/../deploy.php' => $deployPhpContent,
-                    '/test/root/dir/../app/config/Deployer/servers.yml' => $serversYmlContent,
+                    '/test/root/dir/../app/config/deployment/servers.yml' => $serversYmlContent,
                 ]
             ],
             [
@@ -182,11 +182,11 @@ EOS;
                 ['The `/../deploy.php` file exists! Do you want override it? (y/N)' => true], // $questionResponses
                 [
                     'Create the /../deploy.php file.',
-                    'Create the /../app/config/Deployer/servers.yml file.',
+                    'Create the /../app/config/deployment/servers.yml file.',
                 ],
                 [
                     '/../deploy.php' => $deployPhpContent,
-                    '/../app/config/Deployer/servers.yml' => $serversYmlContent,
+                    '/../app/config/deployment/servers.yml' => $serversYmlContent,
                 ]
             ],
             [
@@ -196,11 +196,11 @@ EOS;
                 ['The `/../deploy.php` file exists! Do you want override it? (y/N)' => false], // $questionResponses
                 [
                     'Create the /../deploy.php.tmp file.',
-                    'Create the /../app/config/Deployer/servers.yml file.',
+                    'Create the /../app/config/deployment/servers.yml file.',
                 ],
                 [
                     '/../deploy.php.tmp' => $deployPhpContent,
-                    '/../app/config/Deployer/servers.yml' => $serversYmlContent,
+                    '/../app/config/deployment/servers.yml' => $serversYmlContent,
                 ]
             ],
         ];
