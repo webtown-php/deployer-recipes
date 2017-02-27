@@ -210,6 +210,7 @@ namespace Deployer;
 
 // include base
 require 'vendor/deployer/deployer/recipe/symfony3.php';
+require 'vendor/webtown/deployer-recipes/recipes/common.php';
 // include extension (it contains WT symfony.php)
 require 'vendor/webtown/deployer-recipes/recipes/kunstmaan.php';
 
@@ -263,6 +264,7 @@ namespace Deployer;
 // include base
 require 'vendor/deployer/deployer/recipe/symfony3.php';
 // include extension
+require 'vendor/webtown/deployer-recipes/recipes/common.php';
 require 'vendor/webtown/deployer-recipes/recipes/symfony.php';
 require 'vendor/webtown/deployer-recipes/recipes/load-fixtures.php';
 
@@ -314,6 +316,7 @@ namespace Deployer;
 // include base
 require 'vendor/deployer/deployer/recipe/symfony3.php';
 // include extension
+require 'vendor/webtown/deployer-recipes/recipes/common.php';
 require 'vendor/webtown/deployer-recipes/recipes/maintenance.php'; // <-- first!!!!
 require 'vendor/webtown/deployer-recipes/recipes/symfony.php';     // <-- second!!!
 
