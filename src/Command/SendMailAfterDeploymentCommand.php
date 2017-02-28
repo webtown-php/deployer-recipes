@@ -28,19 +28,14 @@ class SendMailAfterDeploymentCommand extends ContainerAwareCommand
             ->setHelp(<<<EOT
 The <info>%command.name%</info> sends email after deployer deployment:
 
-<info>php app/console %command.name% --branch=master --last=a978ec5fa342d88fa71e67f0482c2b33037a4271</info>
-
-
+<info>%command.full_name% --from=<comment>deploy@example.com</comment> --to=<comment>boss@example.com</comment> --to=<comment>developers@example.com</comment> --subject=<comment>"Deployment success"</comment> --base64-log=<comment>"bGtqc2QzNGxrczQzazJsajJrbDIgVGVzdCBjb21taXQgMg0KazJubGtmZHNsa2ozNDJsa2RqdyBUZXN0IGNvbW1pdCAx"</comment></info>
 EOT
             )
-            ->addOption('branch', null, InputOption::VALUE_OPTIONAL, 'Active branch', 'HEAD')
-            ->addOption('last', null, InputOption::VALUE_OPTIONAL, 'Last deployment\'s commit hash')
-            ->addOption('no-merges', null, InputOption::VALUE_NONE, 'Include merge commits or not')
-            ->addOption('mail-pretty', null, InputOption::VALUE_OPTIONAL, 'GIT log command `--pretty` parameter value in mail body', 'oneline')
-            ->addOption('attachment-pretty', null, InputOption::VALUE_OPTIONAL, 'GIT log command `--pretty` parameter value in mail attachment', 'oneline')
-            ->addOption('from', null, InputOption::VALUE_OPTIONAL, '`From` e-mail address', 'no-reply@webtown.hu')
-            ->addOption('to', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, '`To` e-mail addresses', ["hgabka@gmail.com"])
+            ->addOption('from', null, InputOption::VALUE_REQUIRED, '`From` e-mail address')
+            ->addOption('to', null, InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, '`To` e-mail addresses')
             ->addOption('subject', null, InputOption::VALUE_OPTIONAL, 'E-mail subject', 'Deployment success')
+            ->addOption('base64-log', null, InputOption::VALUE_REQUIRED, 'Base64 encoded GIT log')
+            ->addOption('base64-log-attachment', null, InputOption::VALUE_OPTIONAL, 'Base64 encoded GIT log for attachment')
         ;
     }
 
@@ -49,36 +44,23 @@ EOT
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $bodyOutput = null;
-        $attachmentOutput = null;
-        if ($input->getOption('last')) {
-            $output->writeln('Run git command ...');
-            $command = sprintf('git log %s..%s %s --pretty=%s', $input->getOption('last'), $input->getOption('branch'), $input->getOption('no-merges') ? '--no-merges' : '', $input->getOption('mail-pretty')
-            );
-            $output->writeln("<info>$command</info>");
-            // A levéltőrzsbe kerülő lista
-            exec($command, $bodyOutput);
+        $logForBody = $input->getOption('base64-log')
+            ? base64_decode($input->getOption('base64-log'))
+            : null;
+        $logForAttachment = $input->getOption('base64-log-attachment')
+            ? base64_decode($input->getOption('base64-log-attachment'))
+            : null;
 
-            // Csatolmányként kerül a levélbe
-            if ($input->getOption('attachment-pretty')) {
-                $output->writeln('Run git command (attachment) ...');
-                $command = sprintf('git log %s..%s %s --pretty=%s', $input->getOption('last'), $input->getOption('branch'), $input->getOption('no-merges') ? '--no-merges' : '', $input->getOption('attachment-pretty')
-                );
-                $output->writeln("<info>$command</info>");
-                exec($command, $attachmentOutput);
-            }
-        }
-
-        $this->sendMail(
+        $n = $this->sendMail(
             $input->getOption('from'),
             $input->getOption('to'),
             $input->getOption('subject'),
             'WebtownDeployerRecipesBundle:Mail:afterDeployment.html.twig',
-            $bodyOutput,
-            $attachmentOutput
+            $logForBody,
+            $logForAttachment
         );
 
-        $output->writeln('Send mails');
+        $output->writeln('Send mails: ' . $n);
     }
 
     /**
@@ -88,16 +70,17 @@ EOT
      * @param string|array $to
      * @param string       $subject
      * @param string       $template
-     * @param string|array $bodyOutput
-     * @param string|array $attachmentOutput
+     * @param string|array $logForBody
+     * @param string|array $logForAttachment
+     * @return int
      */
-    protected function sendMail($from, $to, $subject, $template, $bodyOutput, $attachmentOutput = null)
+    protected function sendMail($from, $to, $subject, $template, $logForBody, $logForAttachment = null)
     {
-        if (is_array($bodyOutput)) {
-            $bodyOutput = implode("\n", $bodyOutput);
+        if (is_array($logForBody)) {
+            $logForBody = implode("\n", $logForBody);
         }
 
-        $body = $this->getContainer()->get('templating')->render($template, [ 'output' => $bodyOutput]);
+        $body = $this->getContainer()->get('templating')->render($template, [ 'log_text' => $logForBody]);
 
         $mail = Swift_Message::newInstance();
 
@@ -108,15 +91,15 @@ EOT
             ->setBody($body, 'text/html')
         ;
 
-        if ($attachmentOutput) {
-            if (is_array($attachmentOutput)) {
-                $attachmentOutput = implode("\n", $attachmentOutput);
+        if ($logForAttachment) {
+            if (is_array($logForAttachment)) {
+                $logForAttachment = implode("\n", $logForAttachment);
             }
 
-            $attachment = Swift_Attachment::newInstance($attachmentOutput, 'commits.txt', 'text/plain');
+            $attachment = Swift_Attachment::newInstance($logForAttachment, 'commits.txt', 'text/plain');
             $mail->attach($attachment);
         }
 
-        $this->getContainer()->get('mailer')->send($mail);
+        return $this->getContainer()->get('mailer')->send($mail);
     }
 }
