@@ -198,6 +198,16 @@ test:
     use_git_changes_mail_notification: false
 ```
 
+You can override the original mail template file. Create your own file to `app/Resources/WebtownDeployerRecipesBundle/views/Mail/afterDeployment.html.twig`:
+
+```twig
+<h2>There is a new deploy!</h2> 
+
+<p>The new changes:</p>
+<pre>
+{{ log_text|format_git_log_self_filter|raw }}
+</pre>
+```
 
 ## Kunstmaan
 
