@@ -252,6 +252,12 @@ task('database:migrate:rollback', function () {
 // Run before rollback
 before('rollback', 'database:migrate:rollback');
 
+task('upload:app_dev', function() {
+    run('cd {{deploy_path}}/current && git archive --remote={{repository}} HEAD web/app_dev.php | tar -x');
+    writeln('Now you can use the <info>app_dev.php</info>!');
+    writeln('<comment>After debug run the <info>deploy:clear_paths</info> task!</comment>');
+})->desc('Upload the deleted app_dev.php. For fast debugging.');
+
 /**
  * Sometimes we need a force cache cleaner
  */
