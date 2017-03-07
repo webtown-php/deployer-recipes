@@ -285,3 +285,11 @@ function getParameters()
 
     return get('symfony_parameters');
 }
+
+/**
+ * Override the original
+ */
+set('composer_options', function () {
+    $base = '{{composer_action}} --verbose --prefer-dist --no-progress --no-interaction --optimize-autoloader';
+    return get('env') == 'prod' ? $base . ' --no-dev' : $base;
+});
