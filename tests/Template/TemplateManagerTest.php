@@ -8,9 +8,10 @@
 
 namespace Tests\Webtown\DeployerRecipesBundle\Template;
 
+use PHPUnit\Framework\TestCase;
 use Webtown\DeployerRecipesBundle\Template\TemplateManager;
 
-class TemplateManagerTest extends \PHPUnit_Framework_TestCase
+class TemplateManagerTest extends TestCase
 {
     /**
      * @param array $templates
@@ -37,7 +38,7 @@ class TemplateManagerTest extends \PHPUnit_Framework_TestCase
 
     public function getGetTemplates()
     {
-        $testTemplate = new TestDirectoryTwigTemplate('', '', new \Twig_Environment(), new DummyFilesystem());
+        $testTemplate = new TestDirectoryTwigTemplate('', '', new \Twig_Environment(new \Twig_Loader_Filesystem()), new DummyFilesystem());
 
         return [
             [[], 'test', new \Exception()],
@@ -64,7 +65,7 @@ class TemplateManagerTest extends \PHPUnit_Framework_TestCase
 
     public function getAvailableTemplates()
     {
-        $testTemplate = new TestDirectoryTwigTemplate('', '', new \Twig_Environment(), new DummyFilesystem());
+        $testTemplate = new TestDirectoryTwigTemplate('', '', new \Twig_Environment(new \Twig_Loader_Filesystem()), new DummyFilesystem());
 
         return [
             [[], []],
