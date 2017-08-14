@@ -9,6 +9,7 @@
 namespace Tests\Webtown\DeployerRecipesBundle\Template;
 
 use Mockery as m;
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\HelperSet;
 use Symfony\Component\Console\Helper\QuestionHelper;
@@ -16,7 +17,7 @@ use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 
-class AbstractDirectoryTwigTemplateTest extends \PHPUnit_Framework_TestCase
+class AbstractDirectoryTwigTemplateTest extends TestCase
 {
     public function tearDown()
     {

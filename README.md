@@ -3,8 +3,10 @@
 Add composer:
 
 ```
-    "webtown/deployer-recipes": "~1.1.0"
+    "webtown/deployer-recipes": "~2.0.0"
 ```
+
+> This version using Deployer **5.x** .
 
 # Bundle Commands
 

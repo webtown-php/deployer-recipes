@@ -9,6 +9,7 @@
 namespace Webtown\DeployerRecipesBundle\Test;
 
 use Mockery as m;
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\HelperSet;
 use Symfony\Component\Console\Helper\QuestionHelper;
@@ -27,7 +28,7 @@ use Webtown\DeployerRecipesBundle\Template\AbstractDirectoryTwigTemplate;
  *
  * @package Webtown\DeployerRecipesBundle\Test
  */
-class AbstractTemplateTestCase extends \PHPUnit_Framework_TestCase
+class AbstractTemplateTestCase extends TestCase
 {
     /**
      * @var DummyFilesystem
